@@ -344,4 +344,4 @@ MIT — free to use as a reference implementation or starting point for your own
 
 ---
 
-Built with love by the Kroxt team · https://kroxt.com
+Built with love by the Kroxt team · https://kroxt-baas.vercel.app
