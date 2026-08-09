@@ -83,7 +83,7 @@ npm install
 
 ### 2. Create your Kroxt project
 
-1. Sign up at [kroxt.com](https://kroxt-baas.vercel.app)
+1. Sign up at [kroxt-baas.vercel.app](https://kroxt-baas.vercel.app)
 2. Create a new project
 3. Copy your **Project ID** and **API Key** from the dashboard
 
