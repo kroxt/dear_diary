@@ -1,5 +1,4 @@
 import baas from '@/kroxt';
-import type { AuthSession } from "@kroxt/baas-sdk";
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -8,34 +7,51 @@ import RubberStampBadge from '../components/RubberStampBadge';
 import UnderlineInput from '../components/UnderlineInput';
 import { Theme } from '../constants/theme';
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
   const router = useRouter();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
     setError('');
 
-    if (!email || !password) {
-      setError('Please fill in both your email and password.');
+    if (!name.trim() || !email || !password || !confirmPassword) {
+      setError('Please write your name and fill in all the pages.');
+      return;
+    }
+
+    if (password.length < 8) {
+      setError('Your password must be at least 8 characters long.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('The passwords you typed do not match.');
       return;
     }
 
     setLoading(true);
 
     try {
-      const session: AuthSession = await baas.auth.login({
+      const session = await baas.auth.register({
         email: email,
         password: password,
+        displayName: name
       });
 
       if (session.user) {
-        // Navigate directly to entry list
-        router.push('/list');
+        // Navigate to OTP verification screen
+        router.push({ pathname: '/otp', params: { email } });
+        await baas.communication.sendOtp({
+          email: email,
+          purpose: "signup",
+        });
       } else {
-        setError('Could not open your diary. Please try again.');
+        setError('Could not create your diary. Please try again.');
       }
     } catch (err) {
       setError('Something went wrong. Please check your connection.');
@@ -51,15 +67,23 @@ export default function LoginScreen() {
     >
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={styles.badgeContainer}>
-          <RubberStampBadge icon="feather" size={40} color={Theme.colors.ink} rotation={-6} />
+          <RubberStampBadge icon="book-open" size={40} color={Theme.colors.ochre} rotation={-6} />
         </View>
 
-        <Text style={styles.title}>Dear Diary</Text>
-        <Text style={styles.subtitle}>Welcome back. Your pages are waiting.</Text>
+        <Text style={styles.title}>New Journal</Text>
+        <Text style={styles.subtitle}>Begin your writing journey today.</Text>
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         <View style={styles.form}>
+          <UnderlineInput
+            label="Name"
+            placeholder="Your name"
+            value={name}
+            onChangeText={setName}
+            autoCapitalize="words"
+          />
+
           <UnderlineInput
             label="Email Address"
             placeholder="your.email@domain.com"
@@ -71,31 +95,35 @@ export default function LoginScreen() {
 
           <UnderlineInput
             label="Password"
-            placeholder="••••••••"
+            placeholder="Min. 8 characters"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
             autoCapitalize="none"
           />
 
+          <UnderlineInput
+            label="Confirm Password"
+            placeholder="Repeat password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry
+            autoCapitalize="none"
+          />
+
           <PrimaryButton
-            title="Open my diary"
-            onPress={handleLogin}
-            variant="ink"
+            title="Create my diary"
+            onPress={handleRegister}
+            variant="ochre"
             loading={loading}
             style={styles.button}
           />
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>First time here? </Text>
-            <Pressable onPress={() => router.push('/register')}>
-              <Text style={styles.linkText}>Create my diary</Text>
+            <Text style={styles.footerText}>Already have a diary? </Text>
+            <Pressable onPress={() => router.push('/')}>
+              <Text style={styles.linkText}>Open it here</Text>
             </Pressable>
-          </View>
-
-          <View style={styles.poweredBy}>
-            <Text style={styles.poweredByText}>Powered by </Text>
-            <Text style={styles.poweredByBrand}>Kroxt BaaS</Text>
           </View>
         </View>
       </ScrollView>
@@ -162,22 +190,6 @@ const styles = StyleSheet.create({
     fontFamily: Theme.fonts.body,
     fontSize: Theme.fontSizes.sm,
     fontWeight: 'bold',
-    color: Theme.colors.ochre,
-  },
-  poweredBy: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: Theme.spacing.xxl,
-  },
-  poweredByText: {
-    fontFamily: Theme.fonts.body,
-    fontSize: Theme.fontSizes.xs,
-    color: Theme.colors.inkFaint,
-  },
-  poweredByBrand: {
-    fontFamily: Theme.fonts.body,
-    fontSize: Theme.fontSizes.xs,
-    fontWeight: 'bold',
-    color: Theme.colors.inkFaint,
+    color: Theme.colors.ink,
   },
 });

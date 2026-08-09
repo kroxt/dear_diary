@@ -4,6 +4,9 @@
   "version": "1.0.0",
   "dependencies": {
     "@expo/ui": "~56.0.25",
+    "@expo/vector-icons": "^15.0.2",
+    "@kroxt/baas-sdk": "^1.0.7",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~56.0.19",
     "expo-constants": "~56.0.23",
     "expo-device": "~56.0.4",
